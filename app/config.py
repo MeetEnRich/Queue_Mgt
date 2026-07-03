@@ -16,6 +16,13 @@ class BaseConfig:
         "DATABASE_URL", "sqlite:///dqms.sqlite3"
     )
 
+    # ── Geofencing Configuration ──
+    GEOFENCE_ENABLED: bool = os.environ.get("GEOFENCE_ENABLED", "False").lower() in ("true", "1", "yes")
+    GEOFENCE_LATITUDE: float = float(os.environ.get("GEOFENCE_LATITUDE", 8.4746))
+    GEOFENCE_LONGITUDE: float = float(os.environ.get("GEOFENCE_LONGITUDE", 8.5583))
+    GEOFENCE_RADIUS_METERS: float = float(os.environ.get("GEOFENCE_RADIUS_METERS", 1500.0))
+
+
 
 class DevelopmentConfig(BaseConfig):
     """Development-specific settings."""

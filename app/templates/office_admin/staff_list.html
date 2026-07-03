@@ -70,7 +70,7 @@
                         <td>{{ s.full_name }}</td>
                         <td><code>{{ s.username }}</code></td>
                         <td>
-                            <span class="badge badge--role">{{ s.role | replace('_', ' ') | title }}</span>
+                            {{ s.role | replace('_', ' ') | title }}
                         </td>
                         <td>{{ s.counter_number or '—' }}</td>
                         <td>

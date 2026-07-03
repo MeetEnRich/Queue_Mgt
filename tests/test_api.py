@@ -270,3 +270,106 @@ class TestCrossOfficeBlocked:
             response = client.post(f'/api/staff/complete/{bursary_token.id}')
             # Should be rejected
             assert response.status_code in (403, 404, 400)
+
+
+# -------------------------------------------------------------------------
+# Geofencing Validation
+# -------------------------------------------------------------------------
+
+class TestGeofencing:
+    """Tests for student registration geofencing limits."""
+
+    def test_registration_allowed_when_geofence_disabled(
+        self, client, sample_office, category_for_office_a, db
+    ):
+        """When GEOFENCE_ENABLED is False, registration should succeed without coordinates."""
+        client.application.config['GEOFENCE_ENABLED'] = False
+        
+        response = client.post(
+            f'/o/{sample_office.slug}/register',
+            data={
+                'matric_no': '2021/CP/CSC/0295',
+                'full_name': 'Stephen Oche',
+                'department': 'Computer Science',
+                'category_id': category_for_office_a.id,
+                'description': 'Need login help',
+            },
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert b"You have joined the queue" in response.data
+
+    def test_registration_denied_when_missing_coordinates(
+        self, client, sample_office, category_for_office_a, db
+    ):
+        """When GEOFENCE_ENABLED is True, registration should fail if coordinates are missing."""
+        client.application.config['GEOFENCE_ENABLED'] = True
+        
+        response = client.post(
+            f'/o/{sample_office.slug}/register',
+            data={
+                'matric_no': '2021/CP/CSC/0295',
+                'full_name': 'Stephen Oche',
+                'department': 'Computer Science',
+                'category_id': category_for_office_a.id,
+                'description': 'Need login help',
+                'latitude': '',
+                'longitude': '',
+            },
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert b"Location access is required" in response.data
+
+    def test_registration_denied_when_outside_radius(
+        self, client, sample_office, category_for_office_a, db
+    ):
+        """When GEOFENCE_ENABLED is True, registration should fail if outside radius."""
+        client.application.config['GEOFENCE_ENABLED'] = True
+        client.application.config['GEOFENCE_LATITUDE'] = 8.4746
+        client.application.config['GEOFENCE_LONGITUDE'] = 8.5583
+        client.application.config['GEOFENCE_RADIUS_METERS'] = 1500.0
+        
+        # Test coordinates outside Lafia (e.g. Lagos, lat=6.5244, lng=3.3792)
+        response = client.post(
+            f'/o/{sample_office.slug}/register',
+            data={
+                'matric_no': '2021/CP/CSC/0295',
+                'full_name': 'Stephen Oche',
+                'department': 'Computer Science',
+                'category_id': category_for_office_a.id,
+                'description': 'Need login help',
+                'latitude': '6.5244',
+                'longitude': '3.3792',
+            },
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert b"Registration Denied: You must be physically within the FULafia campus" in response.data
+
+    def test_registration_allowed_when_inside_radius(
+        self, client, sample_office, category_for_office_a, db
+    ):
+        """When GEOFENCE_ENABLED is True, registration should succeed if inside radius."""
+        client.application.config['GEOFENCE_ENABLED'] = True
+        client.application.config['GEOFENCE_LATITUDE'] = 8.4746
+        client.application.config['GEOFENCE_LONGITUDE'] = 8.5583
+        client.application.config['GEOFENCE_RADIUS_METERS'] = 1500.0
+        
+        # Test coordinates very close to FULafia center (lat=8.4747, lng=8.5584)
+        response = client.post(
+            f'/o/{sample_office.slug}/register',
+            data={
+                'matric_no': '2021/CP/CSC/0295',
+                'full_name': 'Stephen Oche',
+                'department': 'Computer Science',
+                'category_id': category_for_office_a.id,
+                'description': 'Need login help',
+                'latitude': '8.4747',
+                'longitude': '8.5584',
+            },
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert b"You have joined the queue" in response.data
+

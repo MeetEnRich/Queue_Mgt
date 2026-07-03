@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, session, request, abort
+from flask import render_template, redirect, url_for, flash, session, request, abort, current_app
 
 from app.blueprints.student import student_bp
 from app.blueprints.student.forms import RegisterForm
@@ -23,6 +23,48 @@ def register(office_slug):
     form.category_id.choices = [(c.id, c.name) for c in categories]
 
     if form.validate_on_submit():
+        # Geofencing check
+        if current_app.config.get('GEOFENCE_ENABLED'):
+            lat_str = form.latitude.data
+            lng_str = form.longitude.data
+
+            if not lat_str or not lng_str:
+                flash('Location access is required to join the queue. Please enable GPS on your device and reload the page.', 'error')
+                return render_template(
+                    'student/register.html',
+                    office=office, categories=categories, form=form,
+                )
+
+            try:
+                lat = float(lat_str)
+                lng = float(lng_str)
+            except ValueError:
+                flash('Invalid location coordinates received.', 'error')
+                return render_template(
+                    'student/register.html',
+                    office=office, categories=categories, form=form,
+                )
+
+            # Haversine Distance Calculation
+            import math
+            target_lat = current_app.config.get('GEOFENCE_LATITUDE', 8.4746)
+            target_lng = current_app.config.get('GEOFENCE_LONGITUDE', 8.5583)
+            radius = current_app.config.get('GEOFENCE_RADIUS_METERS', 1500.0)
+
+            dlat = math.radians(target_lat - lat)
+            dlon = math.radians(target_lng - lng)
+            a = (math.sin(dlat / 2) ** 2 +
+                 math.cos(math.radians(lat)) * math.cos(math.radians(target_lat)) * math.sin(dlon / 2) ** 2)
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            distance = 6371000.0 * c  # distance in meters
+
+            if distance > radius:
+                flash(f'Registration Denied: You must be physically within the FULafia campus boundaries to join the queue. (Distance: {distance:.0f}m, Limit: {radius:.0f}m)', 'error')
+                return render_template(
+                    'student/register.html',
+                    office=office, categories=categories, form=form,
+                )
+
         student_data = {
             'matric_no': form.matric_no.data.strip().upper(),
             'full_name': form.full_name.data.strip(),

@@ -16,7 +16,12 @@
 
     <div class="register-wrapper">
         <div class="glass-card register-card animate-slide-up">
-            <form method="POST" class="register-form" novalidate>
+            <form method="POST" class="register-form" id="registerForm" novalidate
+                  data-geofence-enabled="{{ config.GEOFENCE_ENABLED | tojson }}"
+                  data-geofence-lat="{{ config.GEOFENCE_LATITUDE }}"
+                  data-geofence-lng="{{ config.GEOFENCE_LONGITUDE }}"
+                  data-geofence-radius="{{ config.GEOFENCE_RADIUS_METERS }}">
+                
                 {{ form.hidden_tag() }}
 
                 <div class="form-group">
@@ -74,4 +79,70 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    if (!form) return;
+
+    const geofenceEnabled = form.dataset.geofenceEnabled === 'true';
+    if (!geofenceEnabled) return;
+
+    let locationAcquired = false;
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function(e) {
+        // If we already verified location, allow standard submission
+        if (locationAcquired) {
+            return;
+        }
+
+        e.preventDefault(); // Stop form submission to verify location first
+
+        submitBtn.setAttribute('disabled', 'true');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = 'Verifying location...';
+
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser. Please try another browser.');
+            submitBtn.removeAttribute('disabled');
+            submitBtn.innerHTML = originalText;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Set hidden field values
+                const latField = document.getElementById('latitude');
+                const lngField = document.getElementById('longitude');
+                
+                if (latField) latField.value = position.coords.latitude;
+                if (lngField) lngField.value = position.coords.longitude;
+                
+                locationAcquired = true;
+                submitBtn.innerHTML = 'Joining Queue...';
+                form.submit(); // Re-trigger form submission
+            },
+            function(error) {
+                let msg = 'Location access is required to join the queue. ';
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg += 'Please grant location permission to this site in your browser settings.';
+                } else {
+                    msg += 'Please ensure GPS/location services are turned on and try again.';
+                }
+                alert(msg);
+                submitBtn.removeAttribute('disabled');
+                submitBtn.innerHTML = originalText;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    });
+});
+</script>
 {% endblock %}

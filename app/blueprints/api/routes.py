@@ -236,3 +236,16 @@ def api_university_analytics():
     """Return university-wide analytics."""
     data = university_summary()
     return jsonify(data), 200
+
+
+@api_bp.route('/super-admin/analytics/<office_slug>', methods=['GET'])
+@login_required
+@role_required('super_admin')
+def api_super_office_analytics(office_slug):
+    """Return detailed analytics for a specific office (Super Admin only)."""
+    office = Office.query.filter_by(slug=office_slug).first_or_404()
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    data = office_summary(office.id, date_from, date_to)
+    return jsonify(data), 200
+

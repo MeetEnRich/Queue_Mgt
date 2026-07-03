@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, SubmitField
+from wtforms import StringField, TextAreaField, SelectField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, Optional, Regexp
 
 
@@ -44,4 +44,6 @@ class RegisterForm(FlaskForm):
             'rows': 4
         }
     )
+    latitude = HiddenField('Latitude', validators=[Optional()])
+    longitude = HiddenField('Longitude', validators=[Optional()])
     submit = SubmitField('Join Queue')

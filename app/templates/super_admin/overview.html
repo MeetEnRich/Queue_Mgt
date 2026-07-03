@@ -11,102 +11,188 @@
 {% endblock %}
 
 {% block content %}
-<section class="container" id="adminDashboard" data-role="super_admin">
-    <div class="page-header">
-        <h1 class="page-header__title">
-            {% if drill_office is defined and drill_office %}
-                {{ drill_office.name }} — Analytics
-            {% else %}
-                University-Wide Queue Dashboard
-            {% endif %}
-        </h1>
-        <p class="page-header__subtitle" style="color: var(--text-secondary); margin-top: 4px;">
-            {% if drill_office is defined and drill_office %}
-                <a href="{{ url_for('super_admin.overview') }}" class="back-link">&larr; Back to Overview</a>
-            {% else %}
-                Real-time queue monitoring across all offices
-            {% endif %}
-        </p>
+<section class="container" id="adminDashboard" data-role="super_admin"
+         {% if drill_office %} data-office-slug="{{ drill_office.slug }}" {% endif %}>
+    
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg);">
+        <div>
+            <h1 class="page-header__title" style="margin-bottom: 2px;">
+                {% if drill_office %}
+                    {{ drill_office.name }} — Analytics
+                {% else %}
+                    University-Wide Queue Dashboard
+                {% endif %}
+            </h1>
+            <p class="page-header__subtitle" style="color: var(--text-secondary);">
+                {% if drill_office %}
+                    <a href="{{ url_for('super_admin.overview') }}" class="back-link">&larr; Back to Overview</a>
+                {% else %}
+                    Real-time queue monitoring across all offices
+                {% endif %}
+            </p>
+        </div>
+        {% if not drill_office %}
+        <div>
+            <a href="{{ url_for('super_admin.offices') }}" class="btn btn--ghost">
+                Configure Offices
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     {# ── Top-level Stats ── #}
     {% if summary %}
     <div class="stats-summary-grid">
-        <div class="stat-box">
-            <div class="stat-box__value">{{ summary.total_served_today if summary.total_served_today is defined else 0 }}</div>
-            <div class="stat-box__label">Served Today</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
-                {{ summary.busiest_office if summary.busiest_office is defined else '—' }}
+        {% if drill_office %}
+            <div class="stat-box">
+                <div class="stat-box__value">{{ summary.total_served if summary.total_served is defined else 0 }}</div>
+                <div class="stat-box__label">Total Served</div>
             </div>
-            <div class="stat-box__label">Busiest Office</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
-                {{ summary.worst_avg_wait if summary.worst_avg_wait is defined else '—' }}
+            <div class="stat-box">
+                <div class="stat-box__value">
+                    {% if summary and summary.avg_wait_seconds is defined %}
+                        {{ (summary.avg_wait_seconds // 60) | int }}
+                    {% else %}
+                        0
+                    {% endif %} min
+                </div>
+                <div class="stat-box__label">Avg Wait Time</div>
             </div>
-            <div class="stat-box__label">Worst Avg Wait</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box__value">{{ summary.total_waiting if summary.total_waiting is defined else 0 }}</div>
-            <div class="stat-box__label">Total Waiting</div>
-        </div>
+            <div class="stat-box">
+                <div class="stat-box__value">
+                    {% if summary and summary.avg_service_seconds is defined %}
+                        {{ (summary.avg_service_seconds // 60) | int }}
+                    {% else %}
+                        0
+                    {% endif %} min
+                </div>
+                <div class="stat-box__label">Avg Service Time</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box__value">{{ summary.total_waiting if summary.total_waiting is defined else 0 }}</div>
+                <div class="stat-box__label">Current Queue</div>
+            </div>
+        {% else %}
+            <div class="stat-box">
+                <div class="stat-box__value">{{ summary.total_served_today if summary.total_served_today is defined else 0 }}</div>
+                <div class="stat-box__label">Served Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
+                    {{ summary.busiest_office if summary.busiest_office is defined else '—' }}
+                </div>
+                <div class="stat-box__label">Busiest Office</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
+                    {% if summary.worst_avg_wait is defined and summary.worst_avg_wait %}
+                        {{ (summary.worst_avg_wait // 60) | int }} min
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+                <div class="stat-box__label">Worst Avg Wait</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box__value">{{ summary.total_waiting if summary.total_waiting is defined else 0 }}</div>
+                <div class="stat-box__label">Total Waiting</div>
+            </div>
+        {% endif %}
     </div>
     {% endif %}
 
-    {# ── Office Comparison Table ── #}
-    {% if summary and summary.offices is defined %}
-    <div class="office-comparison" style="margin-top: var(--space-xl);">
-        <h2 style="margin-bottom: var(--space-md);">Office Performance</h2>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Office</th>
-                        <th>Served Today</th>
-                        <th>Waiting</th>
-                        <th>Avg Wait</th>
-                        <th>Avg Service</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for o in summary.offices %}
+    {# ── Date Range Filter (only for drill-down) ── #}
+    {% if drill_office %}
+        <div class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-md); margin-top: var(--space-md);">
+            <form method="GET" style="display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <label class="form-label" for="date_from">From</label>
+                    <input type="date" id="date_from" name="date_from" class="form-input" value="{{ date_from or '' }}">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <label class="form-label" for="date_to">To</label>
+                    <input type="date" id="date_to" name="date_to" class="form-input" value="{{ date_to or '' }}">
+                </div>
+                <button type="submit" class="btn btn--primary" style="padding: 10px 20px;">Apply</button>
+            </form>
+        </div>
+    {% endif %}
+
+    {# ── Conditional Display: Single Office Drill-down vs University-wide Comparison ── #}
+    {% if drill_office %}
+        {# ── Single Office Detailed Charts ── #}
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Hourly Arrivals</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Category Breakdown</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid chart-grid--single" style="margin-top: var(--space-xl);">
+            <div class="chart-card">
+                <h3 class="chart-title">Staff Leaderboard</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="staffChart"></canvas>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {# ── Office Comparison Table ── #}
+        {% if summary and summary.offices is defined %}
+        <div class="office-comparison" style="margin-top: var(--space-xl);">
+            <h2 style="margin-bottom: var(--space-md);">Office Performance</h2>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td><strong>{{ o.name if o.name is defined else '' }}</strong></td>
-                            <td>{{ o.total_served if o.total_served is defined else 0 }}</td>
-                            <td>{{ o.waiting if o.waiting is defined else 0 }}</td>
-                            <td>{{ (o.avg_wait // 60) | int }} min</td>
-                            <td>{{ (o.avg_service // 60) | int }} min</td>
-                            <td>
-                                <a href="{{ url_for('super_admin.office_detail', office_slug=o.slug) if o.slug is defined else '#' }}"
-                                   class="btn btn--ghost btn--sm">View Analytics</a>
-                            </td>
+                            <th>Office</th>
+                            <th>Served Today</th>
+                            <th>Waiting</th>
+                            <th>Avg Wait</th>
+                            <th>Avg Service</th>
+                            <th>Actions</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    {# ── Chart ── #}
-    <div class="chart-grid chart-grid--single" style="margin-top: var(--space-xl);">
-        <div class="chart-card">
-            <h3 class="chart-title">Office Comparison Chart</h3>
-            <div style="height: 250px; position: relative;">
-                <canvas id="officeComparisonChart"></canvas>
+                    </thead>
+                    <tbody>
+                        {% for o in summary.offices %}
+                            <tr>
+                                <td><strong>{{ o.name if o.name is defined else '' }}</strong></td>
+                                <td>{{ o.total_served if o.total_served is defined else 0 }}</td>
+                                <td>{{ o.waiting if o.waiting is defined else 0 }}</td>
+                                <td>{{ (o.avg_wait // 60) | int }} min</td>
+                                <td>{{ (o.avg_service // 60) | int }} min</td>
+                                <td>
+                                    <a href="{{ url_for('super_admin.office_detail', office_slug=o.slug) if o.slug is defined else '#' }}"
+                                       class="btn btn--ghost btn--sm">View Analytics</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+        {% endif %}
 
-    {# ── Manage link ── #}
-    <div class="admin-links-row" style="margin-top: var(--space-xl);">
-        <a href="{{ url_for('super_admin.offices') }}" class="admin-link-button">
-            Configure Offices
-        </a>
-    </div>
+        {# ── Office Comparison Chart ── #}
+        <div class="chart-grid chart-grid--single" style="margin-top: var(--space-xl);">
+            <div class="chart-card">
+                <h3 class="chart-title">Office Comparison Chart</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="officeComparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
 </section>
 {% endblock %}
 

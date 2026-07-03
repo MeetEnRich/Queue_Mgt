@@ -87,9 +87,16 @@ pip install -r requirements.txt
 # Copy the example environment file
 copy .env.example .env   # Windows
 # cp .env.example .env   # macOS/Linux
-
-# Edit .env and set your SECRET_KEY
 ```
+
+Edit the `.env` file to customize the application variables. 
+
+#### Geofencing Validation Settings
+The system supports location validation to ensure registration is restricted to campus boundaries:
+- **`GEOFENCE_ENABLED`**: Set to `True` to enable geolocation verification (default is `False` for easy local testing).
+- **`GEOFENCE_LATITUDE`** & **`GEOFENCE_LONGITUDE`**: Coordinates of the center boundary (default: FULafia Main Campus: `8.4746, 8.5583`).
+- **`GEOFENCE_RADIUS_METERS`**: Maximum allowed distance from coordinates to register (default: `1500` meters).
+- *Tip for testing:* If you enable this for defense/demonstrations outside the campus, set the latitude/longitude in your `.env` to your exact current coordinates so validation passes.
 
 ### 5. Initialize the Database
 

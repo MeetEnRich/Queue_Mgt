@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    const officeSlug = dashboard.dataset.officeSlug;
     if (role === 'office_admin') {
         loadOfficeAnalytics();
     } else if (role === 'super_admin') {
-        loadSuperAnalytics();
+        if (officeSlug) {
+            loadSuperOfficeAnalytics(officeSlug);
+        } else {
+            loadSuperAnalytics();
+        }
     }
 
     function loadOfficeAnalytics() {
@@ -54,6 +59,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderOfficeComparisonChart(data.offices || []);
             })
             .catch(error => console.error('Error loading super analytics:', error));
+    }
+
+    function loadSuperOfficeAnalytics(officeSlug) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateFrom = urlParams.get('date_from') || '';
+        const dateTo = urlParams.get('date_to') || '';
+        
+        let apiUrl = `/api/super-admin/analytics/${officeSlug}`;
+        if (dateFrom || dateTo) {
+            apiUrl += `?date_from=${dateFrom}&date_to=${dateTo}`;
+        }
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch analytics');
+                return response.json();
+            })
+            .then(data => {
+                renderHourlyChart(data.hourly_arrivals || []);
+                renderCategoryChart(data.by_category || []);
+                renderStaffChart(data.staff_leaderboard || []);
+            })
+            .catch(error => console.error('Error loading super office analytics:', error));
     }
 
     function renderHourlyChart(hourlyArrivals) {
@@ -133,10 +161,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
+                        position: window.innerWidth < 600 ? 'bottom' : 'right',
                         labels: {
                             boxWidth: 12,
-                            padding: 15
+                            padding: window.innerWidth < 600 ? 8 : 15
                         }
                     }
                 }

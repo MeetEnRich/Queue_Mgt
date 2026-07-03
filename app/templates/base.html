@@ -40,21 +40,27 @@
 
             <div class="navbar__links">
                 {% if current_user.is_authenticated %}
-                    {% if current_user.office %}
-                        <span class="navbar__office">{{ current_user.office.name }}</span>
-                    {% endif %}
-                    <span class="badge badge--role">{{ current_user.role | replace('_', ' ') | title }}</span>
-                    <span class="navbar__user">{{ current_user.full_name }}</span>
+                    <div class="navbar__profile">
+                        {% if current_user.office %}
+                            <span class="navbar__office">{{ current_user.office.name }}</span>
+                        {% endif %}
+                        <span class="navbar__role">{{ current_user.role | replace('_', ' ') | title }}</span>
+                        <span class="navbar__user-divider">&bull;</span>
+                        <span class="navbar__user">{{ current_user.full_name }}</span>
+                    </div>
 
-                    {% if current_user.role == 'super_admin' %}
-                        <a href="{{ url_for('super_admin.overview') }}" class="navbar__link">Dashboard</a>
-                    {% elif current_user.role == 'office_admin' %}
-                        <a href="{{ url_for('office_admin.dashboard') }}" class="navbar__link">Dashboard</a>
-                    {% else %}
-                        <a href="{{ url_for('staff.dashboard') }}" class="navbar__link">Dashboard</a>
-                    {% endif %}
+                    <span class="navbar__separator"></span>
 
-                    <a href="{{ url_for('auth.logout') }}" class="navbar__link navbar__link--logout">Logout</a>
+                    <div class="navbar__menu">
+                        {% if current_user.role == 'super_admin' %}
+                            <a href="{{ url_for('super_admin.overview') }}" class="navbar__link">Dashboard</a>
+                        {% elif current_user.role == 'office_admin' %}
+                            <a href="{{ url_for('office_admin.dashboard') }}" class="navbar__link">Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('staff.dashboard') }}" class="navbar__link">Dashboard</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="navbar__link navbar__link--logout">Logout</a>
+                    </div>
                 {% else %}
                     <a href="{{ url_for('auth.login') }}" class="navbar__link">Staff Login</a>
                 {% endif %}
