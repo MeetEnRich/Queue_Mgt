@@ -168,7 +168,6 @@ def office_summary(
         "renege_count": renege_count,
     }
 
-
 def university_summary() -> dict[str, Any]:
     """Generate a university-wide analytics summary across all offices.
 
@@ -181,6 +180,7 @@ def university_summary() -> dict[str, Any]:
     now = datetime.utcnow().time()
     office_data: list[dict[str, Any]] = []
     total_served_all = 0
+    total_waiting_all = 0
     busiest_office: str | None = None
     busiest_count = 0
     worst_avg_wait: float = 0.0
@@ -204,6 +204,7 @@ def university_summary() -> dict[str, Any]:
         )
 
         total_served_all += summary["total_served"]
+        total_waiting_all += summary["total_waiting"]
 
         if summary["total_served"] > busiest_count:
             busiest_count = summary["total_served"]
@@ -216,7 +217,10 @@ def university_summary() -> dict[str, Any]:
     return {
         "offices": office_data,
         "total_served_all": total_served_all,
+        "total_served_today": total_served_all,
+        "total_waiting": total_waiting_all,
         "busiest_office": busiest_office,
         "worst_avg_wait": round(worst_avg_wait, 1),
         "worst_avg_wait_office": worst_wait_office,
     }
+

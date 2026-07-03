@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                                 <div class="active-ticket-actions">
                                     <button class="btn btn--success btn--block" id="complete-btn" data-token-id="${cs.id}">
-                                        <span class="btn__icon">✓</span> Mark Resolved
+                                        Mark Resolved
                                     </button>
                                     <button class="btn btn--warning btn--block" id="skip-btn" data-token-id="${cs.id}">
-                                        <span class="btn__icon">✗</span> Skip Turn
+                                        Skip Turn
                                     </button>
                                 </div>
                             </div>
@@ -87,10 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('skip-btn').addEventListener('click', handleSkip);
                     } else {
                         activeTicketCard.innerHTML = `
-                            <div class="empty-serving-state">
-                                <div class="empty-state__icon">📭</div>
-                                <h3>No Active Student</h3>
-                                <p class="text-secondary">Click "Call Next" when you are ready to attend to the next student in line.</p>
+                            <div class="empty-serving-state" style="text-align: center; padding: var(--space-lg) 0;">
+                                <p style="color: var(--text-muted);">No active student.</p>
                             </div>
                         `;
                     }

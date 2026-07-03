@@ -22,10 +22,7 @@ from app.models import Office, ComplaintCategory, Student, Staff, Complaint, Que
 @pytest.fixture(scope='session')
 def app():
     """Create the Flask application configured for testing."""
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['WTF_CSRF_ENABLED'] = False
+    app = create_app('testing')
     app.config['SERVER_NAME'] = 'localhost'
     return app
 

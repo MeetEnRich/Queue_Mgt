@@ -7,24 +7,23 @@
 {% endblock %}
 
 {% block content %}
-<section class="section container" id="statusPage"
+<section class="container" id="statusPage"
          data-token-id="{{ token.token_id }}"
          data-office-slug="{{ office.slug }}">
 
-    <div class="page-header animate-fade-in">
+    <div class="page-header">
         <a href="{{ url_for('main.office_directory') }}" class="back-link">&larr; Back to Offices</a>
         <h1 class="page-header__title">{{ office.name }}</h1>
     </div>
 
     {# ── Token Display ── #}
-    <div class="status-wrapper animate-slide-up">
-        <div class="token-card glass-card">
-            <span class="token-card__label">Your Token</span>
-            <div class="token-card__number" id="tokenNumber">
+    <div class="status-container animate-slide-up">
+        <div class="glass-card" style="margin-bottom: var(--space-lg); padding: var(--space-xl);">
+            <div style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Your Queue Token</div>
+            <div class="token-display" id="tokenNumber">
                 #{{ '%03d' % token.token_number }}
             </div>
-
-            <div class="token-card__badge-wrap">
+            <div>
                 <span class="badge badge--{{ token.status }}" id="statusBadge">
                     {{ token.status | replace('_', ' ') | title }}
                 </span>
@@ -32,74 +31,69 @@
         </div>
 
         {# ── Queue Info Cards ── #}
-        <div class="status-grid">
-            <div class="glass-card status-info-card">
-                <span class="status-info-card__icon">📍</span>
-                <span class="status-info-card__label">Position</span>
-                <span class="status-info-card__value" id="positionValue">
+        <div class="stats-summary-grid">
+            <div class="stat-box">
+                <div class="stat-box__label">Queue Position</div>
+                <div class="stat-box__value" id="positionValue" style="margin-top: 4px; font-size: 1.5rem;">
                     {% if token.position is defined and token.position %}
                         #{{ token.position }}
                     {% else %}
-                        —
+                        -
                     {% endif %}
-                </span>
+                </div>
             </div>
 
-            <div class="glass-card status-info-card">
-                <span class="status-info-card__icon">⏱️</span>
-                <span class="status-info-card__label">Est. Wait</span>
-                <span class="status-info-card__value" id="waitValue">
+            <div class="stat-box">
+                <div class="stat-box__label">Estimated Wait</div>
+                <div class="stat-box__value" id="waitValue" style="margin-top: 4px; font-size: 1.5rem;">
                     {% if token.estimated_wait_seconds is defined and token.estimated_wait_seconds %}
                         ~{{ (token.estimated_wait_seconds // 60) }} min
                     {% else %}
-                        —
+                        -
                     {% endif %}
-                </span>
+                </div>
             </div>
 
-            <div class="glass-card status-info-card">
-                <span class="status-info-card__icon">🔔</span>
-                <span class="status-info-card__label">Now Serving</span>
-                <span class="status-info-card__value" id="servingValue">
+            <div class="stat-box">
+                <div class="stat-box__label">Now Serving</div>
+                <div class="stat-box__value" id="servingValue" style="margin-top: 4px; font-size: 1.5rem;">
                     {% if token.currently_serving is defined and token.currently_serving %}
                         #{{ '%03d' % token.currently_serving }}
                     {% else %}
-                        —
+                        -
                     {% endif %}
-                </span>
+                </div>
             </div>
         </div>
 
         {# ── Cancel Button ── #}
         {% if token.status in ['waiting', 'being_served'] %}
-            <div class="status-actions">
+            <div style="margin-top: var(--space-xl);">
                 <button
                     class="btn btn--danger btn--block"
                     id="cancelBtn"
                     onclick="cancelQueue()"
                 >
-                    Cancel Queue
+                    Leave Queue
                 </button>
             </div>
         {% endif %}
 
         {# ── Final Status Message ── #}
-        <div class="final-message glass-card" id="finalMessage" style="display:none;">
-            <span class="final-message__icon" id="finalIcon">✅</span>
-            <h2 class="final-message__title" id="finalTitle">Done!</h2>
-            <p class="final-message__text" id="finalText"></p>
+        <div class="glass-card" id="finalMessage" style="display:none; margin-top: var(--space-xl); padding: var(--space-xl);">
+            <h2 id="finalTitle" style="margin-bottom: var(--space-sm);">Done!</h2>
+            <p id="finalText" style="color: var(--text-secondary); margin-bottom: var(--space-lg);"></p>
             <a href="{{ url_for('main.office_directory') }}" class="btn btn--primary">Back to Offices</a>
         </div>
     </div>
 
     {# ── YOUR TURN overlay ── #}
-    <div class="turn-overlay" id="turnOverlay">
-        <div class="turn-overlay__card glass-card">
-            <div class="turn-overlay__icon">🎉</div>
-            <h1 class="turn-overlay__title">YOUR TURN!</h1>
-            <p class="turn-overlay__text">Please proceed to the counter now.</p>
-            <button class="btn btn--primary btn--lg" onclick="document.getElementById('turnOverlay').classList.remove('active')">
-                Got it!
+    <div class="modal-overlay" id="turnOverlay">
+        <div class="modal-content">
+            <h1 style="font-size: 1.8rem; margin-bottom: var(--space-sm);">YOUR TURN!</h1>
+            <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">Please proceed to the office service counter now.</p>
+            <button class="btn btn--primary btn--block btn--lg" onclick="document.getElementById('turnOverlay').classList.remove('active')">
+                Got it
             </button>
         </div>
     </div>

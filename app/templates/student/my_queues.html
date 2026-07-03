@@ -31,10 +31,9 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state glass-card">
-            <div class="empty-state__icon">📋</div>
+        <div class="glass-card" style="text-align: center; padding: var(--space-2xl) 0;">
             <h3>No Active Queues</h3>
-            <p>You don't have any active queue tickets right now.</p>
+            <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">You don't have any active queue tickets right now.</p>
             <a href="{{ url_for('main.office_directory') }}" class="btn btn--primary">Browse Offices</a>
         </div>
     {% endif %}

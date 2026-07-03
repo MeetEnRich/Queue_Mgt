@@ -11,87 +11,97 @@
 {% endblock %}
 
 {% block content %}
-<section class="section container" id="adminDashboard" data-role="office_admin">
-    <div class="page-header animate-fade-in">
+<section class="container" id="adminDashboard" data-role="office_admin">
+    <div class="page-header">
         <h1 class="page-header__title">{{ office.name }}</h1>
-        <p class="page-header__subtitle">Office Admin Dashboard</p>
+        <p class="page-header__subtitle" style="color: var(--text-secondary); margin-top: 4px;">Office Admin Control Panel</p>
     </div>
 
     {# ── Date Range Filter ── #}
-    <div class="date-filter glass-card animate-slide-up">
-        <form method="GET" class="date-filter__form">
-            <div class="form-group form-group--inline">
+    <div class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-md);">
+        <form method="GET" style="display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
                 <label class="form-label" for="date_from">From</label>
                 <input type="date" id="date_from" name="date_from" class="form-input" value="{{ date_from }}">
             </div>
-            <div class="form-group form-group--inline">
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
                 <label class="form-label" for="date_to">To</label>
                 <input type="date" id="date_to" name="date_to" class="form-input" value="{{ date_to }}">
             </div>
-            <button type="submit" class="btn btn--primary btn--sm">Apply</button>
+            <button type="submit" class="btn btn--primary" style="padding: 10px 20px;">Apply</button>
         </form>
     </div>
 
     {# ── Summary Stats ── #}
-    <div class="admin-stats-grid animate-slide-up delay-1">
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">🎫</span>
-            <span class="admin-stat-card__value">{{ summary.total_served if summary else 0 }}</span>
-            <span class="admin-stat-card__label">Total Served</span>
+    <div class="stats-summary-grid">
+        <div class="stat-box">
+            <div class="stat-box__value">{{ summary.total_served if summary else 0 }}</div>
+            <div class="stat-box__label">Total Served</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">⏱️</span>
-            <span class="admin-stat-card__value">{{ summary.avg_wait_minutes if summary else 0 }} min</span>
-            <span class="admin-stat-card__label">Avg Wait Time</span>
+        <div class="stat-box">
+            <div class="stat-box__value">
+                {% if summary and summary.avg_wait_seconds is defined %}
+                    {{ (summary.avg_wait_seconds // 60) | int }}
+                {% else %}
+                    0
+                {% endif %} min
+            </div>
+            <div class="stat-box__label">Avg Wait Time</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">🔧</span>
-            <span class="admin-stat-card__value">{{ summary.avg_service_minutes if summary else 0 }} min</span>
-            <span class="admin-stat-card__label">Avg Service Time</span>
+        <div class="stat-box">
+            <div class="stat-box__value">
+                {% if summary and summary.avg_service_seconds is defined %}
+                    {{ (summary.avg_service_seconds // 60) | int }}
+                {% else %}
+                    0
+                {% endif %} min
+            </div>
+            <div class="stat-box__label">Avg Service Time</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">📊</span>
-            <span class="admin-stat-card__value">{{ summary.queue_size if summary else 0 }}</span>
-            <span class="admin-stat-card__label">Current Queue</span>
+        <div class="stat-box">
+            <div class="stat-box__value">{{ summary.total_waiting if summary and summary.total_waiting is defined else 0 }}</div>
+            <div class="stat-box__label">Current Queue</div>
         </div>
     </div>
 
     {# ── Charts ── #}
-    <div class="chart-grid animate-slide-up delay-2">
-        <div class="glass-card chart-container">
-            <h3 class="chart-container__title">Hourly Arrivals</h3>
-            <canvas id="hourlyChart"></canvas>
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3 class="chart-title">Hourly Arrivals</h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="hourlyChart"></canvas>
+            </div>
         </div>
-        <div class="glass-card chart-container">
-            <h3 class="chart-container__title">Category Breakdown</h3>
-            <canvas id="categoryChart"></canvas>
+        <div class="chart-card">
+            <h3 class="chart-title">Category Breakdown</h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <div class="chart-grid chart-grid--single animate-slide-up delay-3">
-        <div class="glass-card chart-container">
-            <h3 class="chart-container__title">Staff Leaderboard</h3>
-            <canvas id="staffChart"></canvas>
+    <div class="chart-grid chart-grid--single">
+        <div class="chart-card">
+            <h3 class="chart-title">Staff Leaderboard</h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="staffChart"></canvas>
+            </div>
         </div>
     </div>
 
     {# ── Quick Links ── #}
-    <div class="admin-links animate-slide-up delay-3">
-        <a href="{{ url_for('office_admin.staff_list') }}" class="glass-card admin-link-card">
-            <span class="admin-link-card__icon">👥</span>
-            <span>Manage Staff</span>
+    <div class="admin-links-row">
+        <a href="{{ url_for('office_admin.staff_list') }}" class="admin-link-button">
+            Manage Staff
         </a>
-        <a href="{{ url_for('office_admin.categories') }}" class="glass-card admin-link-card">
-            <span class="admin-link-card__icon">🏷️</span>
-            <span>Categories</span>
+        <a href="{{ url_for('office_admin.categories') }}" class="admin-link-button">
+            Manage Categories
         </a>
-        <a href="{{ url_for('office_admin.settings') }}" class="glass-card admin-link-card">
-            <span class="admin-link-card__icon">⚙️</span>
-            <span>Settings</span>
+        <a href="{{ url_for('office_admin.settings') }}" class="admin-link-button">
+            Office Settings
         </a>
-        <a href="{{ url_for('office_admin.export', date_from=date_from, date_to=date_to) }}" class="glass-card admin-link-card">
-            <span class="admin-link-card__icon">📥</span>
-            <span>Export CSV</span>
+        <a href="{{ url_for('office_admin.export', date_from=date_from, date_to=date_to) }}" class="admin-link-button">
+            Export Logs (CSV)
         </a>
     </div>
 </section>

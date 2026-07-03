@@ -93,12 +93,51 @@ def toggle_office(office_slug):
 def office_detail(office_slug):
     """Drill into one office's analytics (read-only)."""
     office = Office.query.filter_by(slug=office_slug).first_or_404()
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
+    
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    
+    date_from = None
+    date_to = None
+    
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+            
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
     summary = office_summary(office.id, date_from, date_to)
+
+    mapped_office = {
+        "name": office.name,
+        "slug": office.slug,
+        "total_served": summary["total_served"],
+        "avg_wait": summary["avg_wait_seconds"],
+        "avg_service": summary["avg_service_seconds"],
+        "is_open": True,
+        "waiting": summary["total_waiting"],
+        "being_served": summary["total_being_served"],
+    }
+
+    payload = {
+        "offices": [mapped_office],
+        "total_served_all": summary["total_served"],
+        "total_served_today": summary["total_served"],
+        "total_waiting": summary["total_waiting"],
+        "busiest_office": None,
+        "worst_avg_wait": round(summary["avg_wait_seconds"], 1),
+        "worst_avg_wait_office": None,
+    }
 
     return render_template(
         'super_admin/overview.html',
-        summary={'offices': [summary]},
+        summary=payload,
         drill_office=office,
     )
+

@@ -6,65 +6,61 @@
 <section class="hero">
     <div class="container">
         <div class="hero__content">
-            <h1 class="hero__title animate-fade-in">
-                Welcome to <span class="accent">FULafia</span> Digital Queue Management
+            <h1 class="hero__title">
+                Welcome to FULafia Digital Queue Management
             </h1>
-            <p class="hero__subtitle animate-fade-in delay-1">
-                Skip the long lines. Join a queue online, track your position in real-time, and get notified when it's your turn.
+            <p class="hero__subtitle">
+                Skip the physical queues. Register online to join an office queue, monitor your real-time position, and receive notifications when you are called.
             </p>
         </div>
     </div>
-    <div class="hero__glow"></div>
 </section>
 
-<section class="section container">
-    <h2 class="section__title">Available Offices</h2>
-    <p class="section__subtitle">Select an office to join its queue</p>
+<section class="container">
+    <h2>Available Offices</h2>
+    <p class="section__subtitle" style="margin-bottom: var(--space-xl); color: var(--text-secondary);">Select an office below to join its queue</p>
 
     {% if offices %}
-        <div class="office-grid">
+        <div class="office-list">
             {% for office in offices %}
-                <div class="glass-card office-card animate-slide-up" style="animation-delay: {{ loop.index0 * 0.1 }}s">
-                    <div class="office-card__header">
-                        <h3 class="office-card__name">{{ office.name }}</h3>
-                        {% set now = import('datetime').datetime.now().time() if false else none %}
-                        <span class="office-card__status office-card__status--open">
-                            <span class="status-dot status-dot--green"></span>
-                            Open
-                        </span>
-                    </div>
+                <div class="office-list-item">
+                    <div class="office-list-item__details">
+                        <h3 class="office-list-item__name">{{ office.name }}</h3>
+                        
+                        {% if office.description %}
+                            <p class="office-list-item__desc">{{ office.description }}</p>
+                        {% endif %}
 
-                    {% if office.description %}
-                        <p class="office-card__desc">{{ office.description }}</p>
-                    {% endif %}
-
-                    <div class="office-card__meta">
-                        <div class="office-card__stat">
-                            <span class="office-card__stat-label">Counters</span>
-                            <span class="office-card__stat-value">{{ office.active_counters }}</span>
-                        </div>
-                        <div class="office-card__stat">
-                            <span class="office-card__stat-label">Hours</span>
-                            <span class="office-card__stat-value">
-                                {{ office.open_time.strftime('%H:%M') if office.open_time else '08:00' }}
-                                &ndash;
-                                {{ office.close_time.strftime('%H:%M') if office.close_time else '16:00' }}
+                        <div class="office-list-item__meta">
+                            <span class="office-list-item__meta-item">
+                                Counters: <strong>{{ office.active_counters }}</strong>
+                            </span>
+                            <span class="office-list-item__meta-item">
+                                Service Hours: <strong>
+                                    {{ office.office_open_time.strftime('%H:%M') if office.office_open_time else '08:00' }}
+                                    -
+                                    {{ office.office_close_time.strftime('%H:%M') if office.office_close_time else '16:00' }}
+                                </strong>
+                            </span>
+                            <span class="office-list-item__meta-item">
+                                Status: <strong style="color: var(--success);">Open</strong>
                             </span>
                         </div>
                     </div>
 
-                    <a href="{{ url_for('student.register', office_slug=office.slug) }}"
-                       class="btn btn--primary btn--block office-card__cta">
-                        Join Queue &rarr;
-                    </a>
+                    <div class="office-list-item__action">
+                        <a href="{{ url_for('student.register', office_slug=office.slug) }}"
+                           class="btn btn--primary">
+                            Join Queue
+                        </a>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state glass-card">
-            <div class="empty-state__icon">🏢</div>
+        <div class="glass-card" style="text-align: center; padding: var(--space-2xl) 0;">
             <h3>No Offices Available</h3>
-            <p>There are currently no active offices. Please check back later.</p>
+            <p style="color: var(--text-secondary); margin-top: var(--space-sm);">There are currently no active offices. Please check back later.</p>
         </div>
     {% endif %}
 </section>

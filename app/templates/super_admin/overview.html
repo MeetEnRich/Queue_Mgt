@@ -11,8 +11,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="section container" id="adminDashboard" data-role="super_admin">
-    <div class="page-header animate-fade-in">
+<section class="container" id="adminDashboard" data-role="super_admin">
+    <div class="page-header">
         <h1 class="page-header__title">
             {% if drill_office is defined and drill_office %}
                 {{ drill_office.name }} — Analytics
@@ -20,46 +20,46 @@
                 University-Wide Queue Dashboard
             {% endif %}
         </h1>
-        <p class="page-header__subtitle">
+        <p class="page-header__subtitle" style="color: var(--text-secondary); margin-top: 4px;">
             {% if drill_office is defined and drill_office %}
                 <a href="{{ url_for('super_admin.overview') }}" class="back-link">&larr; Back to Overview</a>
             {% else %}
-                Real-time overview of all offices
+                Real-time queue monitoring across all offices
             {% endif %}
         </p>
     </div>
 
     {# ── Top-level Stats ── #}
     {% if summary %}
-    <div class="admin-stats-grid animate-slide-up">
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">🎫</span>
-            <span class="admin-stat-card__value">{{ summary.total_served_today if summary.total_served_today is defined else 0 }}</span>
-            <span class="admin-stat-card__label">Served Today</span>
+    <div class="stats-summary-grid">
+        <div class="stat-box">
+            <div class="stat-box__value">{{ summary.total_served_today if summary.total_served_today is defined else 0 }}</div>
+            <div class="stat-box__label">Served Today</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">🏢</span>
-            <span class="admin-stat-card__value">{{ summary.busiest_office if summary.busiest_office is defined else '—' }}</span>
-            <span class="admin-stat-card__label">Busiest Office</span>
+        <div class="stat-box">
+            <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
+                {{ summary.busiest_office if summary.busiest_office is defined else '—' }}
+            </div>
+            <div class="stat-box__label">Busiest Office</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">⏱️</span>
-            <span class="admin-stat-card__value">{{ summary.worst_avg_wait if summary.worst_avg_wait is defined else '—' }}</span>
-            <span class="admin-stat-card__label">Worst Avg Wait</span>
+        <div class="stat-box">
+            <div class="stat-box__value" style="font-size: 1.15rem; font-weight: 700; height: 34px; display: flex; align-items: center; justify-content: center;">
+                {{ summary.worst_avg_wait if summary.worst_avg_wait is defined else '—' }}
+            </div>
+            <div class="stat-box__label">Worst Avg Wait</div>
         </div>
-        <div class="glass-card admin-stat-card">
-            <span class="admin-stat-card__icon">📊</span>
-            <span class="admin-stat-card__value">{{ summary.total_waiting if summary.total_waiting is defined else 0 }}</span>
-            <span class="admin-stat-card__label">Total Waiting</span>
+        <div class="stat-box">
+            <div class="stat-box__value">{{ summary.total_waiting if summary.total_waiting is defined else 0 }}</div>
+            <div class="stat-box__label">Total Waiting</div>
         </div>
     </div>
     {% endif %}
 
-    {# ── Office Comparison ── #}
+    {# ── Office Comparison Table ── #}
     {% if summary and summary.offices is defined %}
-    <div class="office-comparison animate-slide-up delay-1">
-        <h2 class="section__title">Office Comparison</h2>
-        <div class="table-responsive glass-card">
+    <div class="office-comparison" style="margin-top: var(--space-xl);">
+        <h2 style="margin-bottom: var(--space-md);">Office Performance</h2>
+        <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -76,12 +76,12 @@
                         <tr>
                             <td><strong>{{ o.name if o.name is defined else '' }}</strong></td>
                             <td>{{ o.total_served if o.total_served is defined else 0 }}</td>
-                            <td>{{ o.queue_size if o.queue_size is defined else 0 }}</td>
-                            <td>{{ o.avg_wait_minutes if o.avg_wait_minutes is defined else 0 }} min</td>
-                            <td>{{ o.avg_service_minutes if o.avg_service_minutes is defined else 0 }} min</td>
+                            <td>{{ o.waiting if o.waiting is defined else 0 }}</td>
+                            <td>{{ (o.avg_wait // 60) | int }} min</td>
+                            <td>{{ (o.avg_service // 60) | int }} min</td>
                             <td>
                                 <a href="{{ url_for('super_admin.office_detail', office_slug=o.slug) if o.slug is defined else '#' }}"
-                                   class="btn btn--ghost btn--sm">View &rarr;</a>
+                                   class="btn btn--ghost btn--sm">View Analytics</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -92,18 +92,19 @@
     {% endif %}
 
     {# ── Chart ── #}
-    <div class="chart-grid chart-grid--single animate-slide-up delay-2">
-        <div class="glass-card chart-container">
-            <h3 class="chart-container__title">Office Comparison Chart</h3>
-            <canvas id="officeComparisonChart"></canvas>
+    <div class="chart-grid chart-grid--single" style="margin-top: var(--space-xl);">
+        <div class="chart-card">
+            <h3 class="chart-title">Office Comparison Chart</h3>
+            <div style="height: 250px; position: relative;">
+                <canvas id="officeComparisonChart"></canvas>
+            </div>
         </div>
     </div>
 
     {# ── Manage link ── #}
-    <div class="admin-links animate-slide-up delay-3">
-        <a href="{{ url_for('super_admin.offices') }}" class="glass-card admin-link-card">
-            <span class="admin-link-card__icon">🏢</span>
-            <span>Manage Offices</span>
+    <div class="admin-links-row" style="margin-top: var(--space-xl);">
+        <a href="{{ url_for('super_admin.offices') }}" class="admin-link-button">
+            Configure Offices
         </a>
     </div>
 </section>
