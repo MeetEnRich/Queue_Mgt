@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Management — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container">
+    <div class="page-header animate-fade-in">
+        <a href="{{ url_for('office_admin.dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="page-header__title">Staff Management</h1>
+        <p class="page-header__subtitle">{{ office.name }}</p>
+    </div>
+
+    {# ── Add Staff Form ── #}
+    <div class="glass-card form-card animate-slide-up">
+        <h3 class="form-card__title">Add New Staff Member</h3>
+        <form method="POST" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" required placeholder="e.g. jdoe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required placeholder="Min 6 characters">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" class="form-input" required placeholder="John Doe">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="role">Role</label>
+                    <select id="role" name="role" class="form-select">
+                        <option value="staff">Staff</option>
+                        <option value="office_admin">Office Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="counter">Counter #</label>
+                    <input type="number" id="counter" name="counter" class="form-input" placeholder="e.g. 1" min="1">
+                </div>
+                <div class="form-group form-group--action">
+                    <button type="submit" class="btn btn--primary">Add Staff</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {# ── Staff Table ── #}
+    <div class="table-responsive glass-card animate-slide-up delay-1">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Counter</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in staff_members %}
+                    <tr>
+                        <td>{{ s.full_name }}</td>
+                        <td><code>{{ s.username }}</code></td>
+                        <td>
+                            <span class="badge badge--role">{{ s.role | replace('_', ' ') | title }}</span>
+                        </td>
+                        <td>{{ s.counter_number or '—' }}</td>
+                        <td>
+                            {% if s.is_active %}
+                                <span class="badge badge--completed">Active</span>
+                            {% else %}
+                                <span class="badge badge--cancelled">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="data-table__empty">No staff members found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

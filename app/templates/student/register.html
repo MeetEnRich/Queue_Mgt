@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Join Queue — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container">
+    <div class="page-header animate-fade-in">
+        <a href="{{ url_for('main.office_directory') }}" class="back-link">&larr; Back to Offices</a>
+        <h1 class="page-header__title">{{ office.name }}</h1>
+        <p class="page-header__subtitle">Fill in the form below to join the queue</p>
+    </div>
+
+    <div class="register-wrapper">
+        <div class="glass-card register-card animate-slide-up">
+            <form method="POST" class="register-form" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.matric_no.label(class="form-label") }}
+                    {{ form.matric_no(class="form-input" + (" form-input--error" if form.matric_no.errors else "")) }}
+                    <span class="form-hint">Format: YYYY/FACULTY/DEPT/NNNN (e.g. 2021/CP/CSC/0295)</span>
+                    {% for err in form.matric_no.errors %}
+                        <span class="form-error">{{ err }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.full_name.label(class="form-label") }}
+                        {{ form.full_name(class="form-input" + (" form-input--error" if form.full_name.errors else "")) }}
+                        {% for err in form.full_name.errors %}
+                            <span class="form-error">{{ err }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.department.label(class="form-label") }}
+                        {{ form.department(class="form-input" + (" form-input--error" if form.department.errors else "")) }}
+                        {% for err in form.department.errors %}
+                            <span class="form-error">{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.phone_number.label(class="form-label") }}
+                    {{ form.phone_number(class="form-input") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.category_id.label(class="form-label") }}
+                    {{ form.category_id(class="form-select" + (" form-input--error" if form.category_id.errors else "")) }}
+                    {% for err in form.category_id.errors %}
+                        <span class="form-error">{{ err }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-textarea" + (" form-input--error" if form.description.errors else "")) }}
+                    {% for err in form.description.errors %}
+                        <span class="form-error">{{ err }}</span>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block btn--lg">
+                    <span class="btn__icon">🎫</span> Join Queue
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block chartjs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="section container" id="adminDashboard" data-role="office_admin">
+    <div class="page-header animate-fade-in">
+        <h1 class="page-header__title">{{ office.name }}</h1>
+        <p class="page-header__subtitle">Office Admin Dashboard</p>
+    </div>
+
+    {# ── Date Range Filter ── #}
+    <div class="date-filter glass-card animate-slide-up">
+        <form method="GET" class="date-filter__form">
+            <div class="form-group form-group--inline">
+                <label class="form-label" for="date_from">From</label>
+                <input type="date" id="date_from" name="date_from" class="form-input" value="{{ date_from }}">
+            </div>
+            <div class="form-group form-group--inline">
+                <label class="form-label" for="date_to">To</label>
+                <input type="date" id="date_to" name="date_to" class="form-input" value="{{ date_to }}">
+            </div>
+            <button type="submit" class="btn btn--primary btn--sm">Apply</button>
+        </form>
+    </div>
+
+    {# ── Summary Stats ── #}
+    <div class="admin-stats-grid animate-slide-up delay-1">
+        <div class="glass-card admin-stat-card">
+            <span class="admin-stat-card__icon">🎫</span>
+            <span class="admin-stat-card__value">{{ summary.total_served if summary else 0 }}</span>
+            <span class="admin-stat-card__label">Total Served</span>
+        </div>
+        <div class="glass-card admin-stat-card">
+            <span class="admin-stat-card__icon">⏱️</span>
+            <span class="admin-stat-card__value">{{ summary.avg_wait_minutes if summary else 0 }} min</span>
+            <span class="admin-stat-card__label">Avg Wait Time</span>
+        </div>
+        <div class="glass-card admin-stat-card">
+            <span class="admin-stat-card__icon">🔧</span>
+            <span class="admin-stat-card__value">{{ summary.avg_service_minutes if summary else 0 }} min</span>
+            <span class="admin-stat-card__label">Avg Service Time</span>
+        </div>
+        <div class="glass-card admin-stat-card">
+            <span class="admin-stat-card__icon">📊</span>
+            <span class="admin-stat-card__value">{{ summary.queue_size if summary else 0 }}</span>
+            <span class="admin-stat-card__label">Current Queue</span>
+        </div>
+    </div>
+
+    {# ── Charts ── #}
+    <div class="chart-grid animate-slide-up delay-2">
+        <div class="glass-card chart-container">
+            <h3 class="chart-container__title">Hourly Arrivals</h3>
+            <canvas id="hourlyChart"></canvas>
+        </div>
+        <div class="glass-card chart-container">
+            <h3 class="chart-container__title">Category Breakdown</h3>
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-grid chart-grid--single animate-slide-up delay-3">
+        <div class="glass-card chart-container">
+            <h3 class="chart-container__title">Staff Leaderboard</h3>
+            <canvas id="staffChart"></canvas>
+        </div>
+    </div>
+
+    {# ── Quick Links ── #}
+    <div class="admin-links animate-slide-up delay-3">
+        <a href="{{ url_for('office_admin.staff_list') }}" class="glass-card admin-link-card">
+            <span class="admin-link-card__icon">👥</span>
+            <span>Manage Staff</span>
+        </a>
+        <a href="{{ url_for('office_admin.categories') }}" class="glass-card admin-link-card">
+            <span class="admin-link-card__icon">🏷️</span>
+            <span>Categories</span>
+        </a>
+        <a href="{{ url_for('office_admin.settings') }}" class="glass-card admin-link-card">
+            <span class="admin-link-card__icon">⚙️</span>
+            <span>Settings</span>
+        </a>
+        <a href="{{ url_for('office_admin.export', date_from=date_from, date_to=date_to) }}" class="glass-card admin-link-card">
+            <span class="admin-link-card__icon">📥</span>
+            <span>Export CSV</span>
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_charts.js') }}"></script>
+{% endblock %}

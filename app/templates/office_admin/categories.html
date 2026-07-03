@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Categories — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container">
+    <div class="page-header animate-fade-in">
+        <a href="{{ url_for('office_admin.dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="page-header__title">Complaint Categories</h1>
+        <p class="page-header__subtitle">{{ office.name }}</p>
+    </div>
+
+    {# ── Add Category ── #}
+    <div class="glass-card form-card animate-slide-up">
+        <h3 class="form-card__title">Add New Category</h3>
+        <form method="POST" class="inline-form inline-form--row">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create">
+            <div class="form-group form-group--grow">
+                <input type="text" name="name" class="form-input" required placeholder="Category name, e.g. Transcript Request">
+            </div>
+            <button type="submit" class="btn btn--primary">Add Category</button>
+        </form>
+    </div>
+
+    {# ── Categories List ── #}
+    <div class="category-list animate-slide-up delay-1">
+        {% for cat in categories %}
+            <div class="glass-card category-item">
+                <div class="category-item__info">
+                    <span class="category-item__name">{{ cat.name }}</span>
+                    {% if cat.is_active %}
+                        <span class="badge badge--completed">Active</span>
+                    {% else %}
+                        <span class="badge badge--skipped">Inactive</span>
+                    {% endif %}
+                </div>
+                <form method="POST" class="category-item__action">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle">
+                    <input type="hidden" name="category_id" value="{{ cat.id }}">
+                    <button type="submit" class="btn btn--ghost btn--sm">
+                        {% if cat.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="empty-state glass-card">
+                <div class="empty-state__icon">🏷️</div>
+                <h3>No Categories</h3>
+                <p>Create your first complaint category using the form above.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

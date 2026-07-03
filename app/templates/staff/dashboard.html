@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/staff.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container" id="staffDashboard"
+         data-office-id="{{ office.id }}"
+         data-staff-name="{{ current_user.full_name }}"
+         data-counter="{{ current_user.counter_number or '' }}">
+
+    {# ── Header ── #}
+    <div class="page-header animate-fade-in">
+        <h1 class="page-header__title">{{ office.name }}</h1>
+        <p class="page-header__subtitle">
+            Staff Dashboard &mdash; {{ current_user.full_name }}
+            {% if current_user.counter_number %}
+                &bull; Counter {{ current_user.counter_number }}
+            {% endif %}
+        </p>
+    </div>
+
+    {# ── Stats Bar ── #}
+    <div class="stats-bar animate-slide-up">
+        <div class="glass-card stat-chip">
+            <span class="stat-chip__label">Waiting</span>
+            <span class="stat-chip__value" id="statWaiting">0</span>
+        </div>
+        <div class="glass-card stat-chip">
+            <span class="stat-chip__label">Being Served</span>
+            <span class="stat-chip__value" id="statServing">0</span>
+        </div>
+        <div class="glass-card stat-chip">
+            <span class="stat-chip__label">Served Today</span>
+            <span class="stat-chip__value" id="statServedToday">0</span>
+        </div>
+        <div class="glass-card stat-chip">
+            <span class="stat-chip__label">Skipped</span>
+            <span class="stat-chip__value" id="statSkipped">0</span>
+        </div>
+    </div>
+
+    {# ── Call Next Button ── #}
+    <div class="call-next-wrap animate-slide-up delay-1">
+        <button class="btn btn--call-next" id="callNextBtn" onclick="callNext()">
+            <span class="btn__icon-lg">📢</span>
+            CALL NEXT
+        </button>
+    </div>
+
+    {# ── Currently Serving ── #}
+    <div class="serving-card glass-card animate-slide-up delay-2" id="servingCard" style="display:none;">
+        <div class="serving-card__header">
+            <h2 class="serving-card__title">Now Serving</h2>
+            <span class="serving-card__token" id="servingToken">#000</span>
+        </div>
+        <div class="serving-card__body">
+            <div class="serving-card__detail">
+                <span class="serving-card__label">Student</span>
+                <span class="serving-card__value" id="servingName">—</span>
+            </div>
+            <div class="serving-card__detail">
+                <span class="serving-card__label">Matric No</span>
+                <span class="serving-card__value" id="servingMatric">—</span>
+            </div>
+            <div class="serving-card__detail">
+                <span class="serving-card__label">Category</span>
+                <span class="serving-card__value" id="servingCategory">—</span>
+            </div>
+            <div class="serving-card__detail serving-card__detail--full">
+                <span class="serving-card__label">Description</span>
+                <span class="serving-card__value" id="servingDesc">—</span>
+            </div>
+        </div>
+        <div class="serving-card__actions">
+            <button class="btn btn--success" id="completeBtn" onclick="completeToken()">
+                ✅ Mark Completed
+            </button>
+            <button class="btn btn--warning" id="skipBtn" onclick="skipToken()">
+                ⏭️ Skip
+            </button>
+        </div>
+    </div>
+
+    {# ── Waitlist Table ── #}
+    <div class="waitlist-section animate-slide-up delay-3">
+        <h2 class="section__title">Queue Waitlist</h2>
+        <div class="table-responsive glass-card">
+            <table class="data-table" id="waitlistTable">
+                <thead>
+                    <tr>
+                        <th>Token #</th>
+                        <th>Student Name</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Joined</th>
+                        <th>Wait Time</th>
+                    </tr>
+                </thead>
+                <tbody id="waitlistBody">
+                    <tr class="data-table__empty">
+                        <td colspan="6">No students in queue</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/staff_dashboard.js') }}"></script>
+{% endblock %}

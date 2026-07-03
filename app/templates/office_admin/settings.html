@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Settings — {{ office.name }} | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container">
+    <div class="page-header animate-fade-in">
+        <a href="{{ url_for('office_admin.dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1 class="page-header__title">Office Settings</h1>
+        <p class="page-header__subtitle">{{ office.name }}</p>
+    </div>
+
+    <div class="settings-grid">
+        {# ── Settings Form ── #}
+        <div class="glass-card form-card animate-slide-up">
+            <h3 class="form-card__title">Queue Configuration</h3>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="max_capacity">Max Queue Capacity</label>
+                    <input type="number" id="max_capacity" name="max_capacity"
+                           class="form-input" value="{{ office.max_capacity }}" min="1">
+                    <span class="form-hint">Maximum students allowed in the queue at once</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="active_counters">Active Counters</label>
+                    <input type="number" id="active_counters" name="active_counters"
+                           class="form-input" value="{{ office.active_counters }}" min="1">
+                    <span class="form-hint">Number of service counters currently open</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="open_time">Open Time</label>
+                        <input type="time" id="open_time" name="open_time"
+                               class="form-input"
+                               value="{{ office.open_time.strftime('%H:%M') if office.open_time else '08:00' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="close_time">Close Time</label>
+                        <input type="time" id="close_time" name="close_time"
+                               class="form-input"
+                               value="{{ office.close_time.strftime('%H:%M') if office.close_time else '16:00' }}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block">Save Settings</button>
+            </form>
+        </div>
+
+        {# ── QR Code ── #}
+        <div class="glass-card qr-card animate-slide-up delay-1">
+            <h3 class="form-card__title">Office QR Code</h3>
+            <p class="qr-card__desc">
+                Students can scan this code to join the queue for <strong>{{ office.name }}</strong>.
+            </p>
+            <div class="qr-card__image">
+                <img src="{{ url_for('office_admin.qr_code') }}" alt="QR Code for {{ office.name }}">
+            </div>
+            <a href="{{ url_for('office_admin.qr_code') }}" download="{{ office.slug }}_qr.png"
+               class="btn btn--ghost btn--block">
+                📥 Download QR Code
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

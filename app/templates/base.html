@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FULafia Digital Queue Management System — Streamlining student services at the Federal University of Lafia.">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{% block title %}FULafia DQMS{% endblock %}</title>
+
+    {# ── Google Fonts ── #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {# ── Base Stylesheet ── #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+
+    {# ── Page-specific CSS ── #}
+    {% block extra_css %}{% endblock %}
+
+    {# ── Chart.js (only loaded when needed) ── #}
+    {% block chartjs %}{% endblock %}
+</head>
+<body>
+    {# ══════════════════════════════════════════════════════════════
+       NAVIGATION BAR
+    ══════════════════════════════════════════════════════════════ #}
+    <nav class="navbar">
+        <div class="navbar__inner container">
+            <a href="{{ url_for('main.office_directory') }}" class="navbar__brand">
+                <img
+                    src="{{ url_for('static', filename='img/logo.png') }}"
+                    alt="FULafia Logo"
+                    class="navbar__logo"
+                    onerror="this.style.display='none'"
+                >
+                <span class="navbar__title">FULafia <span class="accent">DQMS</span></span>
+            </a>
+
+            <div class="navbar__links">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.office %}
+                        <span class="navbar__office">{{ current_user.office.name }}</span>
+                    {% endif %}
+                    <span class="badge badge--role">{{ current_user.role | replace('_', ' ') | title }}</span>
+                    <span class="navbar__user">{{ current_user.full_name }}</span>
+
+                    {% if current_user.role == 'super_admin' %}
+                        <a href="{{ url_for('super_admin.overview') }}" class="navbar__link">Dashboard</a>
+                    {% elif current_user.role == 'office_admin' %}
+                        <a href="{{ url_for('office_admin.dashboard') }}" class="navbar__link">Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('staff.dashboard') }}" class="navbar__link">Dashboard</a>
+                    {% endif %}
+
+                    <a href="{{ url_for('auth.logout') }}" class="navbar__link navbar__link--logout">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="navbar__link">Staff Login</a>
+                {% endif %}
+            </div>
+
+            {# Mobile hamburger #}
+            <button class="navbar__hamburger" aria-label="Toggle menu" onclick="this.closest('.navbar').classList.toggle('open')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    {# ══════════════════════════════════════════════════════════════
+       FLASH MESSAGES
+    ══════════════════════════════════════════════════════════════ #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container container">
+                {% for category, message in messages %}
+                    <div class="flash flash--{{ category }}" role="alert">
+                        <span class="flash__text">{{ message }}</span>
+                        <button class="flash__close" onclick="this.parentElement.remove()" aria-label="Close">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {# ══════════════════════════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════════════════════════ #}
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {# ══════════════════════════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════════════════════════ #}
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Federal University of Lafia &mdash; Digital Queue Management System</p>
+        </div>
+    </footer>
+
+    {# ── Auto-dismiss flash messages ── #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.flash').forEach(function (el) {
+                setTimeout(function () {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-10px)';
+                    setTimeout(function () { el.remove(); }, 400);
+                }, 5000);
+            });
+        });
+    </script>
+
+    {# ── Page-specific JS ── #}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

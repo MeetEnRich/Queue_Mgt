@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Offices | FULafia DQMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="section container">
+    <div class="page-header animate-fade-in">
+        <a href="{{ url_for('super_admin.overview') }}" class="back-link">&larr; Back to Overview</a>
+        <h1 class="page-header__title">Manage Offices</h1>
+    </div>
+
+    {# ── Create Office Form ── #}
+    <div class="glass-card form-card animate-slide-up">
+        <h3 class="form-card__title">Create New Office</h3>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="name">Office Name</label>
+                    <input type="text" id="name" name="name" class="form-input" required
+                           placeholder="e.g. Student Affairs">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="slug">Slug</label>
+                    <input type="text" id="slug" name="slug" class="form-input" required
+                           placeholder="e.g. student-affairs">
+                    <span class="form-hint">URL-safe identifier (lowercase, hyphens)</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description</label>
+                <input type="text" id="description" name="description" class="form-input"
+                       placeholder="Brief description of the office">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="max_capacity">Max Capacity</label>
+                    <input type="number" id="max_capacity" name="max_capacity" class="form-input"
+                           value="50" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="active_counters">Counters</label>
+                    <input type="number" id="active_counters" name="active_counters" class="form-input"
+                           value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="open_time">Open</label>
+                    <input type="time" id="open_time" name="open_time" class="form-input" value="08:00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="close_time">Close</label>
+                    <input type="time" id="close_time" name="close_time" class="form-input" value="16:00">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn--primary">Create Office</button>
+        </form>
+    </div>
+
+    {# ── Offices Table ── #}
+    <div class="table-responsive glass-card animate-slide-up delay-1">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Status</th>
+                    <th>Capacity</th>
+                    <th>Counters</th>
+                    <th>Hours</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in offices %}
+                    <tr>
+                        <td><strong>{{ o.name }}</strong></td>
+                        <td><code>{{ o.slug }}</code></td>
+                        <td>
+                            {% if o.is_active %}
+                                <span class="badge badge--completed">Active</span>
+                            {% else %}
+                                <span class="badge badge--cancelled">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ o.max_capacity }}</td>
+                        <td>{{ o.active_counters }}</td>
+                        <td>
+                            {{ o.open_time.strftime('%H:%M') if o.open_time else '—' }}
+                            &ndash;
+                            {{ o.close_time.strftime('%H:%M') if o.close_time else '—' }}
+                        </td>
+                        <td>
+                            <form method="POST"
+                                  action="{{ url_for('super_admin.toggle_office', office_slug=o.slug) }}"
+                                  style="display:inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn--ghost btn--sm">
+                                    {% if o.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            <a href="{{ url_for('super_admin.office_detail', office_slug=o.slug) }}"
+                               class="btn btn--ghost btn--sm">Details</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="data-table__empty">No offices created yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
