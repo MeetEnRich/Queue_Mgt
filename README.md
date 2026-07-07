@@ -53,74 +53,80 @@ A web-based **Digital Queue Management System** designed for **Federal Universit
 
 ---
 
-## Installation
+## Installation and Setup
 
-### 1. Clone the Repository
+You can set up and run the system either automatically (using the provided `.bat` scripts on Windows) or manually via standard terminal commands.
 
-```bash
-git clone https://github.com/your-username/fulafia-dqms.git
-cd fulafia-dqms
-```
+---
 
-### 2. Create a Virtual Environment
+### Method A: Automatic Setup (Windows)
 
-```bash
-python -m venv venv
+This is the easiest and fastest way to get the system running.
 
-# Activate:
-# Windows:
-venv\Scripts\activate
+1. **Clone the Repository:**
+   ```bash
+   git clone <repository-url>
+   cd Queue_Mgt
+   ```
+2. **Run the Setup Script:**
+   Double-click `setup.bat` (or run it from a terminal: `setup.bat`). This script will automatically:
+   * Create a Python virtual environment (`venv`).
+   * Install all required dependencies from `requirements.txt`.
+   * Create your local `.env` configuration file.
+   * Initialize the SQLite database and create all required tables.
+   * Seed the database with campus offices, complaint categories, staff accounts, and historical queue tokens.
+3. **Start the System:**
+   Double-click `start.bat` (or run it from a terminal: `start.bat`). This will launch the web application.
+4. **Access the System:**
+   Open your browser and navigate to **http://127.0.0.1:5000**.
 
-# macOS/Linux:
-source venv/bin/activate
-```
+---
 
-### 3. Install Dependencies
+### Method B: Manual Setup (Cross-Platform)
 
-```bash
-pip install -r requirements.txt
-```
+Follow these steps if you prefer to set up the environment manually or if you are running on macOS/Linux.
 
-### 4. Configure Environment
-
-```bash
-# Copy the example environment file
-copy .env.example .env   # Windows
-# cp .env.example .env   # macOS/Linux
-```
-
-Edit the `.env` file to customize the application variables. 
-
-#### Geofencing Validation Settings
-The system supports location validation to ensure registration is restricted to campus boundaries:
-- **`GEOFENCE_ENABLED`**: Set to `True` to enable geolocation verification (default is `False` for easy local testing).
-- **`GEOFENCE_LATITUDE`** & **`GEOFENCE_LONGITUDE`**: Coordinates of the center boundary (default: FULafia Main Campus: `8.4746, 8.5583`).
-- **`GEOFENCE_RADIUS_METERS`**: Maximum allowed distance from coordinates to register (default: `1500` meters).
-- *Tip for testing:* If you enable this for defense/demonstrations outside the campus, set the latitude/longitude in your `.env` to your exact current coordinates so validation passes.
-
-### 5. Initialize the Database
-
-```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
-```
-
-### 6. Seed Demo Data
-
-```bash
-python scripts/seed_data.py
-```
-
-This creates 4 offices, staff accounts, 25 student profiles, and ~200+ queue tokens spread across 3 days.
-
-### 7. Run the Application
-
-```bash
-python run.py
-```
-
-The application will be available at **http://127.0.0.1:5000**
+1. **Clone the Repository:**
+   ```bash
+   git clone <repository-url>
+   cd Queue_Mgt
+   ```
+2. **Create a Virtual Environment:**
+   ```bash
+   python -m venv venv
+   
+   # Activate:
+   # Windows:
+   venv\Scripts\activate
+   # macOS/Linux:
+   source venv/bin/activate
+   ```
+3. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Configure Environment:**
+   Copy the example configuration file:
+   ```bash
+   copy .env.example .env   # Windows
+   cp .env.example .env     # macOS/Linux
+   ```
+   *Note: Edit `.env` to configure geofencing and custom settings (see details below).*
+5. **Initialize Database Tables:**
+   Run the following Python command to create your SQLite database tables:
+   ```bash
+   python -c "from app import create_app, db; app = create_app(); ctx = app.app_context(); ctx.push(); db.create_all(); print('Database tables created successfully!')"
+   ```
+6. **Seed Demo Data:**
+   Seed the database with sample university departments, credentials, and historical logs:
+   ```bash
+   python scripts/seed_data.py
+   ```
+7. **Run the Application:**
+   ```bash
+   python run.py
+   ```
+   Open your browser and navigate to **http://127.0.0.1:5000**.
 
 ---
 
@@ -142,7 +148,17 @@ The application will be available at **http://127.0.0.1:5000**
 | Student Affairs Staff 1 | `sa_staff1` | `staff123` | Student Affairs (Counter 1) |
 | Student Affairs Staff 2 | `sa_staff2` | `staff123` | Student Affairs (Counter 2) |
 
-> **Note:** Students do not need passwords — they register with their matric number only.
+### Sample Student Matric Numbers (for testing/demo)
+
+Students join queues by verifying their Matric Number. Here are some seeded student accounts:
+
+| Matric Number | Full Name | Department |
+|---|---|---|
+| `2021/CP/CSC/0295` | Ajunwa Stephen Oche | Computer Science |
+| `2021/NS/CSC/0101` | Chinedu Okonkwo | Computer Science |
+| `2022/CP/CSC/0202` | Abubakar Sadiq Ibrahim | Computer Science |
+| `2020/AR/PHY/0055` | Ngozi Adaeze Nwosu | Physics |
+| `2021/NS/PHY/0078` | Mohammed Kabir Yusuf | Physics |
 
 ---
 
