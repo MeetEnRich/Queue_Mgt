@@ -40,6 +40,35 @@
                 Login
             </button>
         </form>
+
+        <div class="quick-logins" style="margin-top: var(--space-lg); border-top: 1px solid var(--border-color); padding-top: var(--space-md); text-align: center;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: var(--space-xs); text-transform: uppercase; letter-spacing: 0.5px;">Quick Demo Logins</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;">
+                <button type="button" class="btn btn--ghost quick-login-btn" data-username="superadmin" data-password="admin123" style="font-size: 0.75rem; padding: 4px 8px;">Super Admin</button>
+                <button type="button" class="btn btn--ghost quick-login-btn" data-username="mis_admin" data-password="admin123" style="font-size: 0.75rem; padding: 4px 8px;">MIS Admin</button>
+                <button type="button" class="btn btn--ghost quick-login-btn" data-username="mis_staff1" data-password="staff123" style="font-size: 0.75rem; padding: 4px 8px;">MIS Counter 1</button>
+                <button type="button" class="btn btn--ghost quick-login-btn" data-username="reg_staff1" data-password="staff123" style="font-size: 0.75rem; padding: 4px 8px;">Registry Counter 1</button>
+                <button type="button" class="btn btn--ghost quick-login-btn" data-username="bur_staff1" data-password="staff123" style="font-size: 0.75rem; padding: 4px 8px;">Bursary Counter 1</button>
+            </div>
+        </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const form = document.querySelector('.auth-form');
+
+        document.querySelectorAll('.quick-login-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (usernameInput && passwordInput && form) {
+                    usernameInput.value = this.dataset.username;
+                    passwordInput.value = this.dataset.password;
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
